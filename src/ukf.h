@@ -58,6 +58,12 @@ public:
   ///* Weights of sigma points
   VectorXd weights_;
 
+  ///* Measurement noise radar
+  MatrixXd R_lidar;
+
+  ///* Measurement noise lidar
+  MatrixXd R_radar;
+
   ///* State dimension
   int n_x_;
 

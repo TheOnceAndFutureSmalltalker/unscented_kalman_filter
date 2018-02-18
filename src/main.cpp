@@ -117,7 +117,13 @@ int main()
     	  gt_values(3) = vy_gt;
     	  ground_truth.push_back(gt_values);
 
-          //Call ProcessMeasurment(meas_package) for Kalman filter
+          //Call ProcessMeasurement(meas_package) for Kalman filter
+//          if (sensor_type.compare("L") == 0) {
+//            ukf.ProcessMeasurement(meas_package);
+//          }
+//          if (sensor_type.compare("R") == 0) {
+//            ukf.ProcessMeasurement(meas_package);
+//          }
     	  ukf.ProcessMeasurement(meas_package);
 
     	  //Push the current estimated x,y positon from the Kalman filter's state vector
