@@ -12,8 +12,9 @@ The simulator has 2 different simulations/datasets it can run - Data Set 1 and D
 The Unscented Kalman Filter generates estimates of the car's position and velocity which are better than the measurements provided by either the radar or lidar.  You can see this visually in the screen shot of the simulator above.   The green triangles representing the Extended Kalman Filter estimates are more of a smooth curve which is how we would expect a vehicle to traverse naturally, while the red and blue cirlces of the radar and lidar measurements appear more noisy. 
 
 
-The Unscented Kalman Filter iimproves upon the Extended Kalman Filter in that calculating a Jocabian matrix is no longer required.  Instead, the prediction is based on a sample of the current state.  These sample points are called sigma points.  The sigma points can then be tranformed into the measurement space and a new mean and covariance matrix calculated.  From this the new prediction is made and then combined with the new measurements.  The Unscented KJalman Filter also improves in overall error as is shown below.
+The Unscented Kalman Filter iimproves upon the Extended Kalman Filter in that calculating a Jocabian matrix is no longer required.  Instead, the prediction is based on a sample of the current state.  These sample points are called sigma points.  The sigma points can then be tranformed into the measurement space and a new mean and covariance matrix calculated.  From this the new prediction is made and then combined with the new measurements.  The Unscented Kalman Filter also improves in overall error as is shown below.
 
+I also calculated the NIS per the project description.
 
 ## Results
 
@@ -22,36 +23,17 @@ Running the code against Data Set 1, I recorded the following MSE's for x positi
 
 Variable | Measure
 -----|-----
+Px | 0.0752
+Py | 0.0892
+Vx | 0.3451
+Vy | 0.3343
+
+This compares favorably with the results from the Extended Kalman Filter shown below.
+
+Variable | Measure
+-----|-----
 Px | 0.0964
 Py | 0.0853
 Vx | 0.5154
 Vy | 0.4316
-
-For Data Set 2, I recorded the following errors.
-
-Variable | Measure
------|-----
-Px | 0.0727
-Py | 0.0968
-Vx | 0.4893
-Vy | 0.5078
-
-Going further, I recorded errors that considered lidar measurements only, ignoring the radar measurements.
-
-Variable | Measure
------|-----
-Px | 0.1794
-Py | 0.1533
-Vx | 0.5942
-Vy | 0.4724
-
-Finally, I recorded errors for a run where the lidar was processed as normal and the radar measurements were converted to cartesian coordinates and processed as lidar measurements as well.
-
-Variable | Measure
------|-----
-Px | 0.1506
-Py | 0.1660
-Vx | 0.6012
-Vy | 0.6089
-
 
