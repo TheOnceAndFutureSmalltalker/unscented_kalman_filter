@@ -82,6 +82,10 @@ public:
   ///* Predicted sigma points
   MatrixXd Xsig_pred;
 
+  ///* DEBUG ONLY, for printing intermediate results
+  int count;
+  int print;
+
   /**
    * Constructor
    */

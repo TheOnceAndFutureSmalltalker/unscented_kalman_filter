@@ -25,10 +25,10 @@ UKF::UKF() {
   P_ = MatrixXd(5, 5);
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 2.0;
+  std_a_ = 1.0;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 1.2;
+  std_yawdd_ = 0.5;
 
   //DO NOT MODIFY measurement noise values below these are provided by the sensor manufacturer.
   // Laser measurement noise standard deviation position1 in m
@@ -75,6 +75,10 @@ UKF::UKF() {
   R_radar(0,0) = std_radr_*std_radr_;
   R_radar(1,1) = std_radphi_*std_radphi_;
   R_radar(2,2) = std_radrd_*std_radrd_;
+
+  // DEGUB ONLY
+  count = 0;
+  print = 0;
 }
 
 UKF::~UKF() {}
@@ -86,12 +90,22 @@ UKF::~UKF() {}
 void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 
   //cout << endl;
+  count++;
 
   if(is_initialized_)
   {
       // calculate delta_t and capture new state time
       double delta_t = (meas_package.timestamp_ - time_us_) / 1000000.0; // convert us to s
 
+      // set a flag to print out data, this is where we cross x axis and things go wrong
+      if(count > 272 && count < 277)
+      {
+          print = 1;
+      }
+      else
+      {
+        print = 0;
+      }
       // update state from measurement
       // NOTE:  prediction and timestamp update are done within each conditional
       // in event we are only using one or the other type of device
@@ -171,6 +185,13 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 void UKF::Prediction(double delta_t) {
   //cout << "prediction step" << endl;
 
+//if(print == 1)
+//{
+//    cout << endl << "STEP " << count << endl;
+//    cout << "INIT " << x_[0] << " " << x_[1] << " " << x_[2] << " " << x_[3] << " " << x_[4] << endl;
+//    //cout << endl << P_ << endl;
+//}
+
   //create augmented mean state
   VectorXd x_aug = VectorXd(n_aug_);
   x_aug << x_, 0.0, 0.0;
@@ -222,6 +243,11 @@ void UKF::Prediction(double delta_t) {
       Xsig_pred(2,i) = v + 0.0 + delta_t*nu_a;
       Xsig_pred(3,i) = psi + psi_dot*delta_t + 0.5*delta_t*delta_t*nu_psi;
       Xsig_pred(4,i) = psi_dot + 0.0 + delta_t*nu_psi;
+
+//      if(print == 1)
+//      {
+//          cout << "XSIG " << Xsig_pred(0,i) << " " << Xsig_pred(1,i) << " " << Xsig_pred(2,i) << " " << Xsig_pred(3,1) << endl;
+//      }
   }
   //cout << Xsig_pred << endl;
 
@@ -240,8 +266,11 @@ void UKF::Prediction(double delta_t) {
   MatrixXd error_transposed_weighted = error_transposed.array().colwise() * weights_.array();
   P_ = error * error_transposed_weighted;
 
-  //cout << x_ << endl;
-  //cout << P_ << endl;
+//if(print == 1)
+//{
+//    //cout << "PRED " << x_[0] << " " << x_[1] << " " << x_[2] << " " << x_[3] << " " << x_[4] << endl;
+//    //cout << endl << P_ << endl;
+//}
 }
 
 /**
@@ -249,6 +278,11 @@ void UKF::Prediction(double delta_t) {
  * @param {MeasurementPackage} meas_package
  */
 void UKF::UpdateLidar(MeasurementPackage meas_package) {
+
+//    if(print == 1)
+//    {
+//        cout << "LIDAR" << endl;
+//    }
   int n_z = 2;
 
   // create matrix for sigma points in measurement space
@@ -299,6 +333,10 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
  * @param {MeasurementPackage} meas_package
  */
 void UKF::UpdateRadar(MeasurementPackage meas_package) {
+//    if(print == 1)
+//    {
+//        cout << "RADAR" << endl;
+//    }
   int n_z = 3;
 
   // create matrix for sigma points in measurement space
@@ -322,6 +360,15 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
       if(px != 0.0)
       {
           Zsig(1,i) = atan2(py, px);
+          // when we cross x axis and px is negative, py may be positive or negative
+          // this means rho may be positive or negative, but around same magnitude, ~3.14
+          // this yields a weighted average that is way off!!
+          // if this happens, lets just bail out and wait for next measurement
+          // note: need more robust solution here, but for, now this works!
+          if(Zsig(1,i) < -3.12 || Zsig(1,i) > 3.12)
+          {
+              return;
+          }
       }
       else
       {
@@ -337,8 +384,30 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
       }
   }
 
+  // if some rho are positive and some are negative then the average will be way off
+  // so check for this condition and set them all to 3.14
+
+
+
   //calculate mean predicted measurement
   z_pred = Zsig * weights_;
+
+  // convert rho back to (-pi,pi)
+  //if(z_pred(1)>M_PI) z_pred(1) -= 2*M_PI;
+//  for(int i=0; i<2 * n_aug_ + 1; i++)
+//  {
+//      if(Zsig(1,i)>M_PI) Zsig(1,i) -= 2*M_PI;
+//      if(print == 1)
+//      {
+//          cout << "ZSIG " << Zsig(0,i) << " " << Zsig(1,i) << " " << Zsig(2,i) << endl;
+//      }
+//  }
+
+
+  if(print == 1)
+  {
+      cout << "ZPRD " << z_pred(0) << " " << z_pred(1) << " " << z_pred(2) << endl;
+  }
 
   //calculate innovation covariance matrix S
   MatrixXd error = Zsig.colwise() - z_pred;
@@ -362,6 +431,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   Tc = X_error * Z_error_transposed_weighted;
   //calculate Kalman gain K;
   MatrixXd K = Tc * S.inverse();
+
 
   //update state mean and covariance matrix
   x_ = x_ + K * (meas_package.raw_measurements_ - z_pred);
