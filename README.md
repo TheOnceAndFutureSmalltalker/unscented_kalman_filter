@@ -12,9 +12,11 @@ The simulator has 2 different simulations/datasets it can run - Data Set 1 and D
 The Unscented Kalman Filter generates estimates of the car's position and velocity which are better than the measurements provided by either the radar or lidar.  You can see this visually in the screen shot of the simulator above.   The green triangles representing the Extended Kalman Filter estimates are more of a smooth curve which is how we would expect a vehicle to traverse naturally, while the red and blue cirlces of the radar and lidar measurements appear more noisy. 
 
 
-The Unscented Kalman Filter iimproves upon the Extended Kalman Filter in that calculating a Jocabian matrix is no longer required.  Instead, the prediction is based on a sample of the current state.  These sample points are called sigma points.  The sigma points can then be tranformed into the measurement space and a new mean and covariance matrix calculated.  From this the new prediction is made and then combined with the new measurements.  The Unscented Kalman Filter also improves in overall error as is shown below.
+The Unscented Kalman Filter improves upon the Extended Kalman Filter in that calculating a Jocabian matrix is no longer required.  Instead, the prediction is based on a sample of the current state.  These sample points are called sigma points.  The sigma points can then be tranformed into the measurement space and a new mean and covariance matrix calculated.  From this the new prediction is made and then combined with the new measurements.  The Unscented Kalman Filter also improves in overall error as is shown below.
 
 I also calculated the NIS per the project description.
+
+For the process noise longitudinal acceleration standard deviation I use 1.0 m/s2 and for yaw acceleration I used 0.5 rad/s2.
 
 ## Results
 
@@ -23,10 +25,10 @@ Running the code against Data Set 1, I recorded the following MSE's for x positi
 
 Variable | Measure
 -----|-----
-Px | 0.0752
-Py | 0.0892
-Vx | 0.3451
-Vy | 0.3343
+Px | 0.0734
+Py | 0.0806
+Vx | 0.3281
+Vy | 0.2988
 
 This compares favorably with the results from the Extended Kalman Filter shown below.
 
